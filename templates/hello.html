@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File List</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+    <style>
+        /* 样式化方形控件 */
+        .file-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .file-box {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .file-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        .file-box:hover .file-info {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>File List</h1>
+    <div id="fileList"></div>
+
+    <script>
+       // 从后端获取 JSON 数据
+fetch('/list_files')
+    .then(response => response.json())
+    .then(data => {
+        // 打印获取到的 JSON 数据
+        console.log('JSON data:', data);
+
+        // 调用渲染函数
+        renderFileList(data.files_info);
+    })
+    .catch(error => console.error('Error fetching data:', error));
+
+// 渲染文件列表
+function renderFileList(filesInfo) {
+    const fileListContainer = document.getElementById('fileList');
+
+    if (!filesInfo || !Array.isArray(filesInfo)) {
+        console.error('Invalid data format');
+        return;
+    }
+
+    filesInfo.forEach(fileInfo => {
+        const fileBox = document.createElement('div');
+        fileBox.classList.add('file-box');
+
+        // 在控件上添加悬停效果
+        fileBox.addEventListener('mouseover', () => showFileInfo(fileInfo));
+
+        // 在控件上添加点击事件
+        fileBox.addEventListener('click', () => copyToClipboard(fileInfo.filename));
+
+        const fileInfoElement = document.createElement('div');
+        fileInfoElement.classList.add('file-info');
+        fileInfoElement.textContent = `${fileInfo.filename}\n${fileInfo.size}`;
+
+        fileBox.appendChild(fileInfoElement);
+        fileListContainer.appendChild(fileBox);
+    });
+}
+
+// 显示文件信息
+function showFileInfo(fileInfo) {
+    console.log(`File: ${fileInfo.filename}, Size: ${fileInfo.size}, Upload Date: ${fileInfo.upload_date}`);
+}
+
+// 复制文件名到剪贴板
+function copyToClipboard(filename) {
+    const clipboard = new ClipboardJS('.file-box', {
+        text: function() {
+            return filename;
+        }
+    });
+
+    clipboard.on('success', function(e) {
+        console.log(`Copied to clipboard: ${e.text}`);
+        clipboard.destroy();
+    });
+
+    clipboard.on('error', function(e) {
+        console.error('Unable to copy to clipboard', e);
+        clipboard.destroy();
+    });
+
+    clipboard.onClick({ trigger: true });
+}
+    </script>
+</body>
+</html>
