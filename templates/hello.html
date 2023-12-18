@@ -7,14 +7,14 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
    <style>
-        /* 样式化方形控件 */
+        /* 样式化方形控件 放置图片 */
         .file-container {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
 
-        /*横向控件*/
+        /*横向控件 按日期排列图片*/
         .horizontal-container {
             display: flex;
             flex-wrap: wrap;
@@ -60,6 +60,104 @@
             text-align: center;
             color: white;
         }
+
+         /* 右下角上传控件 */
+        .floating-button {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 70px; /* 固定宽度 */
+            height: 70px; /* 固定高度 */
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 10px; /* 适当的内边距 */
+            cursor: pointer;
+            font-size: 30px; /* 调整字体大小 */
+            font-weight: bold; /* 调整字体粗细 */
+        }
+
+         /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            text-align: center;
+            position: relative;
+            height: 60%; /* 调整模态框的高度 */
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        .shadow-area {
+            height: 66%;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .imgs-area {
+            height: 25%; /* 调整阴影区域的高度 */
+            background-color: #f0f0f0; /* 设置阴影区域的颜色 */
+            overflow: auto; /* 允许滚动 */
+        }
+
+        .info-text {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            width: 80%;
+            text-align: center;
+        }
+
+        .select-btn {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* 样式表中添加新的类 */
+        .upload-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px;
+            background-color: #45a049; /* 改变颜色 */
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +165,23 @@
         <h1>File List</h1>
     </header>
     <div id="fileList"></div>
+
+     <!-- 右下角固定控件 -->
+    <button class="floating-button" onclick="openModal()">+</button>
+
+    <!-- 模态框 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div class="shadow-area">
+                <div class="info-text">将图片拖拽至此，或选择文件上传</div>
+            </div>
+            <div class="imgs-area" id="uploadedImgs"></div> <!-- 图片暂存区 -->
+            <button class="select-btn" onclick="openFilePicker()">选择图片</button>
+            <input type="file" id="fileInput" onchange="handleFileSelect()">
+            <button class="upload-btn" onclick="uploadFiles()">确定上传</button>
+        </div>
+    </div>
 
     <script>
         // 从后端获取 JSON 数据
@@ -166,7 +281,6 @@
             return pathArray[0] + '//' + pathArray[2] + '/';
         }
 
-
         // 复制文件名到剪贴板
         function copyToClipboard(filename) {
             const clipboard = new ClipboardJS('.file-box', {
@@ -186,6 +300,58 @@
             });
 
             clipboard.onClick({ trigger: true });
+        }
+
+          // 模态框操作
+        function openModal() {
+            document.getElementById('myModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        // 在脚本中添加以下函数
+        function openFilePicker() {
+            document.getElementById('fileInput').click();
+        }
+
+        // 在脚本中修改 handleFileSelect 函数
+        function handleFileSelect() {
+            const uploadedImgs = document.getElementById('uploadedImgs');
+            const fileInput = document.getElementById('fileInput');
+
+            // 遍历用户选择的文件并创建图像元素显示
+            for (const file of fileInput.files) {
+                const imgElement = document.createElement('img');
+                imgElement.src = URL.createObjectURL(file);
+                imgElement.alt = file.name; // 添加图片的替代文本
+                imgElement.style.width = '100px'; // 设置图片宽度
+                imgElement.style.marginRight = '10px'; // 设置图片间距
+                uploadedImgs.appendChild(imgElement);
+            }
+
+            console.log(fileInput.files)
+        }
+
+        // 点击上传按钮时触发的函数
+        function uploadFiles() {
+            const fileInput = document.getElementById('fileInput');
+
+            // 获取用户选择的文件
+            const files = fileInput.files;
+
+            console.log('Uploading files:', files);
+
+            // 如果用户选择了文件
+            if (files.length > 0) {
+                // 这里可以添加文件上传的逻辑，例如使用 fetch API 将文件发送到服务器
+                // 你可以根据实际需求进行修改
+                console.log('Uploading files:', files);
+
+                // 清空选择的文件，避免文件重复选择时无法触发 onchange 事件
+                fileInput.value = null;
+            }
         }
     </script>
 </body>
