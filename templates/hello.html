@@ -178,7 +178,8 @@
             </div>
             <div class="imgs-area" id="uploadedImgs"></div> <!-- 图片暂存区 -->
             <button class="select-btn" onclick="openFilePicker()">选择图片</button>
-            <input type="file" id="fileInput" onchange="handleFileSelect()">
+            <input type="file" id="fileInput" onchange="handleFileSelect()" multiple accept=".png, .PNG, .jpg, .JPG, .jpeg, .JPEG, .gif, .GIF,
+                      .bmp, .BMP, .tiff, .TIFF, .webp, .ICO, .ico" style="display: none;">
             <button class="upload-btn" onclick="uploadFiles()">确定上传</button>
         </div>
     </div>
@@ -316,10 +317,14 @@
             document.getElementById('fileInput').click();
         }
 
+        let selectedImgs = [];
         // 在脚本中修改 handleFileSelect 函数
         function handleFileSelect() {
             const uploadedImgs = document.getElementById('uploadedImgs');
             const fileInput = document.getElementById('fileInput');
+
+            // 添加到待上传数组
+            selectedImgs.push(...fileInput.files)
 
             // 遍历用户选择的文件并创建图像元素显示
             for (const file of fileInput.files) {
@@ -331,24 +336,19 @@
                 uploadedImgs.appendChild(imgElement);
             }
 
-            console.log(fileInput.files)
+            console.log("本次选择：", fileInput.files)
         }
 
         // 点击上传按钮时触发的函数
         function uploadFiles() {
             const fileInput = document.getElementById('fileInput');
 
-            // 获取用户选择的文件
-            const files = fileInput.files;
-
-            console.log('Uploading files:', files);
-
             // 如果用户选择了文件
-            if (files.length > 0) {
+            if (selectedImgs.length > 0) {
                 // 这里可以添加文件上传的逻辑，例如使用 fetch API 将文件发送到服务器
                 // 你可以根据实际需求进行修改
-                console.log('Uploading files:', files);
-
+                for (let i = 0; i < selectedImgs.length; i++)
+                    console.log(selectedImgs[i]);
                 // 清空选择的文件，避免文件重复选择时无法触发 onchange 事件
                 fileInput.value = null;
             }
