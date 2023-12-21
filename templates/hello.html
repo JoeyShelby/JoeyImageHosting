@@ -158,6 +158,21 @@
             border: none;
             cursor: pointer;
         }
+
+        /* 待上传区图片独立容器 */
+        .uploaded-img-container {
+            position: relative;
+            display: inline-block; /* 保证容器只占用实际图像的大小 */
+        }
+
+        /* 待上传区图片删除btn */
+        .delete-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: red;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -305,6 +320,8 @@
 
           // 模态框操作
         function openModal() {
+            // 清空待上传区
+            document.getElementById('uploadedImgs').innerHTML = "";
             document.getElementById('myModal').style.display = 'block';
         }
 
@@ -317,33 +334,83 @@
             document.getElementById('fileInput').click();
         }
 
+        // 待上传区
         let selectedImgs = [];
         // 在脚本中修改 handleFileSelect 函数
         function handleFileSelect() {
-            const uploadedImgs = document.getElementById('uploadedImgs');
             const fileInput = document.getElementById('fileInput');
-
             // 添加到待上传数组
             selectedImgs.push(...fileInput.files)
-
-            // 遍历用户选择的文件并创建图像元素显示
-            for (const file of fileInput.files) {
-                const imgElement = document.createElement('img');
-                imgElement.src = URL.createObjectURL(file);
-                imgElement.alt = file.name; // 添加图片的替代文本
-                imgElement.style.width = '100px'; // 设置图片宽度
-                imgElement.style.marginRight = '10px'; // 设置图片间距
-                uploadedImgs.appendChild(imgElement);
-            }
+            // 渲染
+            renderSelectedImgs();
 
             console.log("本次选择：", fileInput.files)
+        }
+
+        // 去除待上传区文件名重复的图片
+        function removeDuplicates() {
+            // 利用 Map 去重
+            const tempMap = new Map();
+            selectedImgs.forEach(file => {
+                tempMap.set(file.name, file);
+            })
+
+            selectedImgs = Array.from(tempMap.values())
+        }
+
+        // 渲染待上传区的图片
+        function renderSelectedImgs() {
+            const uploadedImgs = document.getElementById('uploadedImgs');
+            uploadedImgs.innerHTML = "";
+
+            // 待上传图片去重
+            removeDuplicates();
+            console.log("renderSelectedImgs", selectedImgs);
+
+             // 遍历用户选择的文件并创建图像元素显示
+            for (const file of selectedImgs) {
+                const imgContainer = document.createElement('div');
+                imgContainer.classList.add('uploaded-img-container');
+
+                const imgElement = document.createElement('img');
+                imgElement.src = URL.createObjectURL(file);
+                imgElement.alt = file.name;
+                imgElement.style.width = '100px';
+                imgElement.style.marginRight = '10px';
+
+                // 创建删除按钮
+                const deleteButton = document.createElement('span');
+                deleteButton.textContent = 'x';
+                deleteButton.classList.add('delete-button');
+
+                // 添加单击事件，调用删除函数
+                deleteButton.addEventListener('click', () => deleteImage(imgContainer, file));
+
+                // 将删除按钮添加到图像元素中
+                imgContainer.appendChild(imgElement);
+                imgContainer.appendChild(deleteButton);
+
+                uploadedImgs.appendChild(imgContainer);
+            }
+        }
+
+        function deleteImage(imgElement) {
+            // 从 DOM 中移除图像元素
+            imgElement.parentNode.removeChild(imgElement);
+
+            // 在 selectedImgs 数组中找到并移除相应的文件
+            const index = selectedImgs.indexOf(imgElement.file);
+            if (index !== -1) {
+                selectedImgs.splice(index, 1);
+            }
+
         }
 
         // 点击上传按钮时触发的函数
         function uploadFiles() {
             const fileInput = document.getElementById('fileInput');
 
-            // 如果用户选择了文件
+            // 上传文件
             if (selectedImgs.length > 0) {
                 // 这里可以添加文件上传的逻辑，例如使用 fetch API 将文件发送到服务器
                 // 你可以根据实际需求进行修改
@@ -352,6 +419,10 @@
                 // 清空选择的文件，避免文件重复选择时无法触发 onchange 事件
                 fileInput.value = null;
             }
+
+            // 上传完成后，清空待上传数组，重新渲染待上传区
+            selectedImgs = [];
+            renderSelectedImgs()
         }
     </script>
 </body>
