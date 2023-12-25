@@ -2,9 +2,9 @@ from flask import Flask, request, render_template, jsonify, send_from_directory
 
 from config import UPLOAD_FOLDER
 from show import list_files
-from upload import upload_file
+from upload import upload_images
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 
 # 返回文件夹里的文件内容，list
@@ -20,23 +20,10 @@ def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
-# 跳转到文件上传页面
-@app.route('/to_upload', methods=['GET', 'POST'])
-def to_upload():
-    return render_template('upload.html')
-
-
-# 文件上传路由
-@app.route('/upload', methods=['POST'])
-def handle_upload():
-    # 获取上传的文件
-    file = request.files.get('file')
-
-    # 调用上传处理函数
-    result = upload_file(file)
-
-    # 返回处理结果给前端
-    return jsonify(result)
+# 上传文件的接口
+@app.route('/upload_images', methods=['POST'])
+def handle_upload_images():
+    return upload_images()
 
 
 @app.route('/list_files', methods=['GET'])

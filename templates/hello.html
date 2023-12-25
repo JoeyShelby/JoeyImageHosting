@@ -4,176 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File List</title>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
-   <style>
-        /* 样式化方形控件 放置图片 */
-        .file-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        /*横向控件 按日期排列图片*/
-        .horizontal-container {
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .file-group {
-            margin-bottom: 20px;
-        }
-
-        .file-box {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            background-color: #f0f0f0;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-right: 10px;
-            margin-bottom: 10px;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .file-info {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-        }
-
-        .file-box:hover .file-info {
-            display: block;
-        }
-          body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-        }
-
-        header {
-            background-color: #333;
-            padding: 10px;
-            text-align: center;
-            color: white;
-        }
-
-         /* 右下角上传控件 */
-        .floating-button {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
-            width: 70px; /* 固定宽度 */
-            height: 70px; /* 固定高度 */
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            padding: 10px; /* 适当的内边距 */
-            cursor: pointer;
-            font-size: 30px; /* 调整字体大小 */
-            font-weight: bold; /* 调整字体粗细 */
-        }
-
-         /* 模态框样式 */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 50%;
-            text-align: center;
-            position: relative;
-            height: 60%; /* 调整模态框的高度 */
-        }
-
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 30px;
-            cursor: pointer;
-        }
-
-        .shadow-area {
-            height: 66%;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            margin-bottom: 20px;
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .imgs-area {
-            height: 25%; /* 调整阴影区域的高度 */
-            background-color: #f0f0f0; /* 设置阴影区域的颜色 */
-            overflow: auto; /* 允许滚动 */
-        }
-
-        .info-text {
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            width: 80%;
-            text-align: center;
-        }
-
-        .select-btn {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        /* 样式表中添加新的类 */
-        .upload-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            padding: 10px;
-            background-color: #45a049; /* 改变颜色 */
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* 待上传区图片独立容器 */
-        .uploaded-img-container {
-            position: relative;
-            display: inline-block; /* 保证容器只占用实际图像的大小 */
-        }
-
-        /* 待上传区图片删除btn */
-        .delete-button {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            color: red;
-            cursor: pointer;
-        }
-    </style>
+    <script src="{{ url_for('static', filename='js/jquery-3.6.4.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/clipboard.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <header>
@@ -181,10 +14,10 @@
     </header>
     <div id="fileList"></div>
 
-     <!-- 右下角固定控件 -->
+     <!-- 右下角固定控件，➕ -->
     <button class="floating-button" onclick="openModal()">+</button>
 
-    <!-- 模态框 -->
+    <!-- 上传图片模态框 -->
     <div id="myModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
@@ -347,6 +180,46 @@
             console.log("本次选择：", fileInput.files)
         }
 
+
+        // 给模态框加上拖拽上传文件的功能
+        document.getElementById('myModal').addEventListener('dragover', allowDrop);
+        document.getElementById('myModal').addEventListener('drop', function(event) {
+            allowDrop(event);
+            handleDrop(event);
+        });
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+        function handleDrop(event) {
+            event.preventDefault();
+
+            const dt = event.dataTransfer;
+            const files = dt.files;
+
+            // 过滤允许上传的文件格式
+            const allowedFormats = ["png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp", "ico"];
+            const validFiles = Array.from(files).filter(file => {
+                const extension = getFileExtension(file.name);
+                return allowedFormats.includes(extension.toLowerCase());
+            });
+
+            console.log("本次拖拽文件:", files);
+            console.log("有效文件:", validFiles);
+
+            // 添加符合条件的文件到selectedImgs数组
+            selectedImgs.push(...validFiles);
+
+            // 渲染待上传区的图片
+            renderSelectedImgs();
+        }
+
+        // 获取文件扩展名的辅助函数
+        function getFileExtension(filename) {
+            const extension = filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+            console.log("文件扩展名:", extension);
+            return extension;
+        }
+
         // 去除待上传区文件名重复的图片
         function removeDuplicates() {
             // 利用 Map 去重
@@ -406,23 +279,42 @@
 
         }
 
-        // 点击上传按钮时触发的函数
-        function uploadFiles() {
+       // 点击上传按钮触发图片上传
+        async function uploadFiles() {
             const fileInput = document.getElementById('fileInput');
 
-            // 上传文件
+            // 检查是否有文件需要上传
             if (selectedImgs.length > 0) {
-                // 这里可以添加文件上传的逻辑，例如使用 fetch API 将文件发送到服务器
-                // 你可以根据实际需求进行修改
-                for (let i = 0; i < selectedImgs.length; i++)
-                    console.log(selectedImgs[i]);
-                // 清空选择的文件，避免文件重复选择时无法触发 onchange 事件
-                fileInput.value = null;
-            }
+                try {
+                    // 使用 FormData 构建表单数据
+                    const formData = new FormData();
+                    selectedImgs.forEach(file => {
+                        formData.append('images', file);
+                    });
 
-            // 上传完成后，清空待上传数组，重新渲染待上传区
-            selectedImgs = [];
-            renderSelectedImgs()
+                    // 使用 Fetch API 发送文件到后端
+                    const response = await fetch('/upload_images', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    if (response.ok) {
+                        console.log('Files uploaded successfully!');
+                        // 清空选择的文件，避免文件重复选择时无法触发 onchange 事件
+                        fileInput.value = null;
+                        // 上传完成，关闭模态框，重新加载页面
+                        closeModal();
+                        location.reload();
+                        // 上传完成后，清空待上传数组，重新渲染待上传区
+                        selectedImgs = [];
+                        renderSelectedImgs();
+                    } else {
+                        console.error('File upload failed.');
+                    }
+                } catch (error) {
+                    console.error('Error uploading files:', error);
+                }
+            }
         }
     </script>
 </body>

@@ -1,0 +1,166 @@
+    /* 样式化方形控件 放置图片 */
+    .file-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /*横向控件 按日期排列图片*/
+    .horizontal-container {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .file-group {
+        margin-bottom: 20px;
+    }
+
+    .file-box {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        background-color: #f0f0f0;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-right: 10px;
+        margin-bottom: 10px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .file-info {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+    }
+
+    .file-box:hover .file-info {
+        display: block;
+    }
+      body {
+        margin: 0;
+        font-family: 'Arial', sans-serif;
+    }
+
+    header {
+        background-color: #333;
+        padding: 10px;
+        text-align: center;
+        color: white;
+    }
+
+     /* 右下角上传控件 */
+    .floating-button {
+        position: fixed;
+        bottom: 40px;
+        right: 40px;
+        width: 70px; /* 固定宽度 */
+        height: 70px; /* 固定高度 */
+        background-color: #333;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        padding: 10px; /* 适当的内边距 */
+        cursor: pointer;
+        font-size: 30px; /* 调整字体大小 */
+        font-weight: bold; /* 调整字体粗细 */
+    }
+
+     /* 模态框样式 */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+        text-align: center;
+        position: relative;
+        height: 60%; /* 调整模态框的高度 */
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 30px;
+        cursor: pointer;
+    }
+
+    .shadow-area {
+        height: 66%;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        margin-bottom: 20px;
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .imgs-area {
+        height: 25%; /* 调整阴影区域的高度 */
+        background-color: #f0f0f0; /* 设置阴影区域的颜色 */
+        overflow: auto; /* 允许滚动 */
+    }
+
+    .info-text {
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        width: 80%;
+        text-align: center;
+    }
+
+    .select-btn {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* 样式表中添加新的类 */
+    .upload-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        padding: 10px;
+        background-color: #45a049; /* 改变颜色 */
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* 待上传区图片独立容器 */
+    .uploaded-img-container {
+        position: relative;
+        display: inline-block; /* 保证容器只占用实际图像的大小 */
+    }
+
+    /* 待上传区图片删除btn */
+    .delete-button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        color: red;
+        cursor: pointer;
+    }

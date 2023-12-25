@@ -1,3 +1,4 @@
+from flask import request, jsonify
 import os
 
 from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
@@ -8,27 +9,22 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def upload_file(file):
-    # 检查是否有文件被上传
-    if not file:
-        return {'error': 'No file part'}
+def upload_images():
+    try:
+        # 检查是否有 'images' 字段在请求中
+        if 'images' not in request.files:
+            return jsonify({'error': 'No images provided'}), 400
 
-    # 如果用户未选择文件，浏览器也会提交一个空的文件字段
-    if file.filename == '':
-        return {'error': 'No selected file ro FileName is NULL'}
+        images = request.files.getlist('images')
 
-    # 检查文件类型是否允许
-    if allowed_file(file.filename):
-        # 生成文件保存路径
-        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        # 保存上传的文件
+        for image in images:
+            # 检查文件类型是否合规
+            if allowed_file(image.filename):
+                image.save(os.path.join(UPLOAD_FOLDER, image.filename))
+            else:
+                return jsonify({'error': 'Invalid file type'}), 400
 
-        # 保存文件
-        file.save(file_path)
-
-        # 返回成功响应
-        return {'message': 'File successfully uploaded', 'file_path': file_path}
-
-    else:
-        return {'error': 'Invalid file type'}
-
-
+        return jsonify({'message': 'Files uploaded successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
